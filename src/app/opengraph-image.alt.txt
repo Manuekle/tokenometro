@@ -1,0 +1,1 @@
+Icono de unos binoculares y la pregunta «¿Cuánto cuesta tu texto en cada modelo?». Una misma frase cortada en 8 tokens por GPT-4o y en 11 por GPT-4, un 38 % más.

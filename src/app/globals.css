@@ -1,0 +1,291 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Dark mode follows the OS: no class toggling, no flash. */
+@custom-variant dark (@media (prefers-color-scheme: dark));
+
+@theme inline {
+  /* Allo (allo-font): variable in weight, roundness (ROND) and optical size (opsz). */
+  --font-sans: "Allo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-heading: var(--font-sans);
+  --font-mono: var(--font-sans);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-raise: var(--raise);
+  --color-faint: var(--faint);
+
+  /* System palette, as on allo.joshpuckett.me. */
+  --color-red: var(--red);
+  --color-orange: var(--orange);
+  --color-yellow: var(--yellow);
+  --color-green: var(--green);
+  --color-mint: var(--mint);
+  --color-cyan: var(--cyan);
+  --color-blue: var(--blue);
+  --color-indigo: var(--indigo);
+  --color-purple: var(--purple);
+  --color-pink: var(--pink);
+  --color-signal: var(--signal);
+  --color-signal-ink: var(--signal-ink);
+  --color-signal-soft: var(--signal-soft);
+
+  /* No borders: surfaces separate by tone; raised things get a whisper of ring. */
+  --shadow-raise: 0 0 0 1px var(--hair), 0 1px 2px var(--drop);
+  --shadow-pop: 0 0 0 1px var(--hair), 0 20px 50px -16px var(--drop-strong);
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 1.75rem;
+  --radius-4xl: 2.25rem;
+}
+
+:root {
+  color-scheme: light dark;
+
+  --paper: #fcfcfc;
+  --ink: #111111;
+  --ink-2: #6c6c70;
+  --ink-3: #a4a4a8;
+  --panel: #f4f4f2;
+  --white: #ffffff;
+  --hair: rgba(17, 17, 17, 0.07);
+  --drop: rgba(17, 17, 17, 0.05);
+  --drop-strong: rgba(17, 17, 17, 0.28);
+
+  --red: #ff3b30;
+  --orange: #ff8d28;
+  --yellow: #ffcc00;
+  --green: #17b26a;
+  --mint: #00c7be;
+  --cyan: #00c0e8;
+  --blue: #0088ff;
+  --indigo: #6155f5;
+  --purple: #cc2fdc;
+  --pink: #ff2d55;
+  --signal: #17b26a;
+  --signal-ink: #0d7a47;
+  --signal-soft: #dcf3e8;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--panel);
+  --card-foreground: var(--ink);
+  --raise: var(--white);
+  --popover: var(--white);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: #ffffff;
+  --secondary: #ebebe8;
+  --secondary-foreground: var(--ink);
+  --muted: #efefed;
+  --muted-foreground: var(--ink-2);
+  --faint: var(--ink-3);
+  --accent: #e9e9e6;
+  --accent-foreground: var(--ink);
+  --destructive: #d83c36;
+  --border: var(--hair);
+  --input: var(--white);
+  --ring: var(--blue);
+  --radius: 1.25rem;
+
+  /* Chart plumbing */
+  --grid: rgba(17, 17, 17, 0.07);
+  --dot: #b5b5b9;
+  --s-input: #111111;
+  --s-cached: #a4a4a8;
+  --s-output: #0088ff;
+  --s-reason: #cc2fdc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #111111;
+    --ink: #ffffff;
+    --ink-2: #98989d;
+    --ink-3: #636366;
+    --panel: #1b1b1c;
+    --white: #353537;
+    --hair: rgba(255, 255, 255, 0.08);
+    --drop: rgba(0, 0, 0, 0.3);
+    --drop-strong: rgba(0, 0, 0, 0.7);
+
+    --red: #ff453a;
+    --orange: #ff9f0a;
+    --yellow: #ffd60a;
+    --green: #30d158;
+    --mint: #63e6e2;
+    --cyan: #64d2ff;
+    --blue: #0a84ff;
+    --indigo: #7d7aff;
+    --purple: #da8fff;
+    --pink: #ff375f;
+    --signal: #30d158;
+    --signal-ink: #5de08a;
+    --signal-soft: #12301f;
+
+    --primary-foreground: #111111;
+    --secondary: #262628;
+    --muted: #202022;
+    --accent: #2c2c2e;
+    --destructive: #ff6a5f;
+
+    --grid: rgba(255, 255, 255, 0.07);
+    --dot: #55555a;
+    --s-input: #ffffff;
+    --s-cached: #636366;
+    --s-output: #0a84ff;
+    --s-reason: #da8fff;
+  }
+}
+
+/* One palette cycles through the tokens of the ribbon. */
+:root {
+  --tint: 26%;
+  --cut-0: color-mix(in oklab, var(--red) var(--tint), var(--card));
+  --cut-1: color-mix(in oklab, var(--blue) var(--tint), var(--card));
+  --cut-2: color-mix(in oklab, var(--orange) calc(var(--tint) + 6%), var(--card));
+  --cut-3: color-mix(in oklab, var(--green) calc(var(--tint) + 2%), var(--card));
+  --cut-4: color-mix(in oklab, var(--purple) var(--tint), var(--card));
+  --cut-5: color-mix(in oklab, var(--yellow) calc(var(--tint) + 20%), var(--card));
+  --cut-6: color-mix(in oklab, var(--mint) calc(var(--tint) + 4%), var(--card));
+  --cut-7: color-mix(in oklab, var(--pink) var(--tint), var(--card));
+  --cut-8: color-mix(in oklab, var(--indigo) var(--tint), var(--card));
+  --cut-9: color-mix(in oklab, var(--cyan) calc(var(--tint) + 6%), var(--card));
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tint: 40%;
+  }
+}
+
+@layer base {
+  * {
+    @apply outline-ring/50;
+    /* No rubber-banding anywhere. */
+    overscroll-behavior: none;
+  }
+  /* No scrollbars inside components. The page itself keeps its own. */
+  *:not(html) {
+    scrollbar-width: none;
+  }
+  *:not(html)::-webkit-scrollbar {
+    display: none;
+  }
+
+  html {
+    @apply font-sans antialiased;
+    font-optical-sizing: auto;
+    font-variation-settings: "ROND" 50;
+    letter-spacing: 0.01em;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior: none;
+  }
+  body {
+    @apply bg-background text-foreground;
+    overscroll-behavior: none;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--blue) 30%, transparent);
+  }
+  button,
+  [role="tab"],
+  [role="combobox"] {
+    cursor: pointer;
+  }
+}
+
+/*
+ * Type roles. Each one tunes the four things Allo lets you tune:
+ * weight, roundness (ROND), optical size (opsz) and letter-spacing.
+ */
+@layer utilities {
+  .role-display {
+    font-weight: 800;
+    font-variation-settings: "ROND" 100;
+    letter-spacing: -0.045em;
+  }
+  .role-thin {
+    font-weight: 200;
+    font-variation-settings: "ROND" 0;
+    letter-spacing: -0.035em;
+  }
+  .role-title {
+    font-weight: 700;
+    font-variation-settings: "ROND" 85;
+    letter-spacing: -0.02em;
+  }
+  /* Small caps-style labels use the Small optical size (9): wider spacing, sharper corners. */
+  .role-label {
+    font-size: 11px;
+    font-weight: 650;
+    font-variation-settings: "ROND" 20, "opsz" 9;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  /* Figures: tabular so columns align, open 4/6/9 (ss03) for a friendlier shape, slightly sharper. */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum", "ss03";
+    font-variation-settings: "ROND" 35;
+    letter-spacing: 0;
+  }
+  .num-lg {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum", "ss03";
+    font-weight: 700;
+    font-variation-settings: "ROND" 90, "opsz" 32;
+    letter-spacing: -0.035em;
+  }
+  /* User text must stay literal: no "->" arrows, no raised punctuation. */
+  .raw {
+    font-variant-ligatures: no-contextual;
+    font-feature-settings: "calt" 0, "case" 0;
+    letter-spacing: 0;
+  }
+  /* Allo's interface symbols (⌕ ✕ ✓ ★ ⌄ ↗ …) are real glyphs in the font. */
+  .sym {
+    display: inline-block;
+    font-weight: 600;
+    font-variation-settings: "ROND" 100;
+    font-feature-settings: "case" 0;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes cut-in {
+    from {
+      opacity: 0;
+      transform: translateY(3px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .cut-in {
+    animation: cut-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+}
