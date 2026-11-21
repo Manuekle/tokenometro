@@ -10,7 +10,7 @@ con la misma tarifa no cuestan lo mismo.
 ```bash
 pnpm install
 pnpm dev          # http://localhost:3000
-pnpm test         # 125 tests (precios, tokenizadores, costos, filtros, comparación, barra fija, SEO)
+pnpm test         # 135 tests (precios, tokenizadores, costos, filtros, comparación, barra fija, SEO)
 pnpm build        # el catálogo se hornea y se revalida cada hora
 pnpm snapshot     # refresca la copia local de precios (src/lib/catalog/snapshot.json)
 pnpm icons        # rehace todos los íconos desde brand/icon.png (solo macOS, usa sips)
@@ -102,7 +102,7 @@ La lógica está en `src/lib/compare.ts` (probada) y la interfaz en `src/compone
 Tipografía [**Allo**](https://allo.joshpuckett.me) (`allo-font`, OFL-1.1) y su paleta. Cada rol de texto afina los
 ejes de la fuente: peso (`wght`), redondez (`ROND`), tamaño óptico (`opsz`) y espaciado. Los iconos son los símbolos
 de la propia fuente (⌕ ✕ ✓ ★ ⌄ ↗ …), no un set aparte. Sin bordes (las superficies se separan por tono), formas
-redondas, sin rebote al desplazar y sin barras de scroll dentro de los componentes. Claro y oscuro siguen al sistema.
+redondas, sin rebote al desplazar y sin barras de scroll dentro de los componentes. Claro y oscuro siguen al sistema hasta que elijas un tema en el footer.
 
 **Columna izquierda fija.** En pantallas anchas (desde 1024 px) «Tu texto» y «Tu carga de trabajo» te acompañan al
 desplazarte. Como juntas miden más que una pantalla (≈1550 px), un `sticky` normal dejaría su parte baja fuera de
@@ -111,15 +111,25 @@ hace lo mismo con el borde superior. Nada de su aspecto cambia. Como todo `stick
 cuanto más larga la columna de resultados (más filas de la tabla, la vista Comparar), más acompaña.
 `src/components/sticky-aside.tsx` y `src/lib/sticky.ts` (la cuenta, con tests).
 
+## Tema e idioma
+
+En el footer puedes elegir **Claro / Oscuro** y **Español / English**. El tema inicialmente sigue al sistema;
+una selección explícita lo reemplaza. Las preferencias quedan guardadas en este navegador. Cambiar de idioma
+traduce la interfaz, las ayudas y las tablas copiadas sin reemplazar tu texto ni reiniciar filtros o cálculos.
+Los precios siguen en USD. Si el almacenamiento está bloqueado, los controles funcionan durante la sesión.
+
+Las traducciones están en `src/lib/i18n/en.json`; los mensajes de origen son los textos en español. Los datos
+variables se insertan después de traducir para conservar nombres de modelos, archivos y texto del usuario.
+
 ## Sitio, SEO y compartir
 
 - **Ícono.** El de la app (unos binoculares) está en `brand/icon.png`. `pnpm icons` saca de ahí el de la pestaña, el de
-  iOS, `favicon.ico` y los del manifest. Los de pestaña usan un recorte más cerrado: a 16 px el ícono completo no se lee.
+  iOS, `favicon.ico` y los del manifest. Los de pestaña mantienen el mismo encuadre y espacio interior que el del footer.
 - **Banner para compartir.** `src/app/opengraph-image.png` (1200×630) con su texto alternativo; Next lo copia también
-  a `twitter:image`. Se dibujó con la tipografía y los colores de la app y muestra una misma frase cortada en 8 tokens
-  por un tokenizador de OpenAI y en 11 por otro. Para cambiarlo, reemplaza el PNG.
+  a `twitter:image`. Su texto está en inglés. Se dibujó con la tipografía y los colores de la app y muestra una misma frase cortada en 7 tokens
+  por un tokenizador de OpenAI y en 8 por otro. Para cambiarlo, reemplaza el PNG.
 - **Metadatos.** Título, descripción, canonical, Open Graph, Twitter Card, `robots` y `viewport` están en
-  `src/app/layout.tsx`; los textos, en `src/lib/site.ts`. `robots.txt`, `sitemap.xml` y `manifest.webmanifest` salen de
+  `src/app/layout.tsx`; los textos, en `src/lib/site.ts` (`SEO` para título, descripción, keywords y Open Graph en inglés). `robots.txt`, `sitemap.xml` y `manifest.webmanifest` salen de
   `src/app/{robots,sitemap,manifest}.ts`. La página lleva datos estructurados (`WebApplication`, JSON-LD).
 - **Dirección del sitio.** En producción define `NEXT_PUBLIC_SITE_URL=https://tu-dominio` (ver `.env.example`); de ahí
   salen el canonical, la imagen para compartir y el sitemap. En Vercel se toma sola la del dominio de producción. Sin

@@ -1,15 +1,8 @@
 "use client";
 
+import { usePreferences } from "@/components/preferences-provider";
 import { useMemo } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Row } from "@/lib/compute-rows";
 import { formatAxisUSD, formatUSD } from "@/lib/format";
 
@@ -46,6 +39,7 @@ export function CostChart({
   requestsPerMonth: number;
   onOpen: (row: Row) => void;
 }) {
+  const { t } = usePreferences();
   const data = useMemo<Datum[]>(() => {
     const byCost = [...rows].sort((a, b) => a.monthly - b.monthly);
     const chosen = new Map<string, Row>();
@@ -65,25 +59,28 @@ export function CostChart({
       }));
   }, [rows, pinned, requestsPerMonth]);
 
-  if (data.length === 0) return <p className="p-8 text-center text-sm text-muted-foreground">Sin modelos para graficar.</p>;
+  if (data.length === 0)
+    return <p className="p-8 text-center text-sm text-muted-foreground">{t("Sin modelos para graficar.")}</p>;
 
   return (
     <figure className="rounded-[32px] bg-card p-5 sm:p-7">
       <figcaption className="mb-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
         <p className="text-xs text-muted-foreground">
-          Los {CHEAPEST} más baratos con tus filtros{pinned.size > 0 ? " y tus fijados" : ""}. Costo mensual por
-          concepto.
+          {t("Los ")}
+          {CHEAPEST} {t(" más baratos con tus filtros")}
+          {pinned.size > 0 ? t(" y tus fijados") : ""}
+          {t(". Costo mensual por concepto.")}
         </p>
         <ul className="flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
           {SERIES.map((s) => (
             <li key={s.key} className="flex items-center gap-1.5">
               <span className="inline-block size-2.5 rounded-full" style={{ background: s.color }} />
-              {s.label}
+              {t(s.label)}
             </li>
           ))}
         </ul>
       </figcaption>
-      <div role="img" aria-label="Costo mensual por modelo, apilado por concepto">
+      <div role="img" aria-label={t("Costo mensual por modelo, apilado por concepto")}>
         <ResponsiveContainer width="100%" height={data.length * 30 + 56}>
           <BarChart data={data} layout="vertical" margin={{ top: 4, right: 24, bottom: 4, left: 4 }} barCategoryGap={5}>
             <CartesianGrid horizontal={false} stroke="var(--grid)" />
@@ -127,6 +124,7 @@ export function CostChart({
 }
 
 function CostTooltip({ active, payload }: { active?: boolean; payload?: { payload: Datum }[] }) {
+  const { t } = usePreferences();
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
@@ -138,14 +136,14 @@ function CostTooltip({ active, payload }: { active?: boolean; payload?: { payloa
             <div key={s.key} className="flex items-center justify-between gap-6">
               <dt className="flex items-center gap-1.5 text-muted-foreground">
                 <span className="inline-block size-2 rounded-full" style={{ background: s.color }} />
-                {s.label}
+                {t(s.label)}
               </dt>
               <dd className="num">{formatUSD(d[s.key])}</dd>
             </div>
           ) : null,
         )}
         <div className="mt-1.5 flex items-center justify-between gap-6 pt-1.5 font-bold">
-          <dt>Total / mes</dt>
+          <dt>{t("Total / mes")}</dt>
           <dd className="num">{formatUSD(d.total)}</dd>
         </div>
       </dl>

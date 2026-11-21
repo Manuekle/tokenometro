@@ -1,26 +1,14 @@
 "use client";
 
+import { usePreferences } from "@/components/preferences-provider";
 import { useMemo, useState } from "react";
 import { cn } from "cn";
 import { Sym } from "@/components/sym";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Analysis, Row } from "@/lib/compute-rows";
-import {
-  formatContext,
-  formatIndex,
-  formatMultiple,
-  formatTokens,
-  formatUSD,
-} from "@/lib/format";
+import { formatContext, formatIndex, formatMultiple, formatTokens, formatUSD } from "@/lib/format";
 import { RefineBar } from "@/components/refine-bar";
 import type { RefineApi } from "@/lib/refine";
 import { TOKENIZERS, isRepoEngine } from "@/lib/tokenizers/registry";
@@ -31,7 +19,10 @@ import { useNow } from "@/lib/use-now";
 function costRange(rows: Row[]): { lo: number; hi: number } | null {
   const costs = rows.map((r) => r.monthly).filter((c) => c > 0);
   if (costs.length === 0) return null;
-  return { lo: Math.log10(Math.min(...costs)), hi: Math.log10(Math.max(...costs)) };
+  return {
+    lo: Math.log10(Math.min(...costs)),
+    hi: Math.log10(Math.max(...costs)),
+  };
 }
 
 /** 0..1 position of `cost` inside the log range (0.5 when there is no spread). */
@@ -48,10 +39,26 @@ const FIRST_PAGE = 10;
 const STEP = 20;
 
 const ACCURACY: Record<DisplayAccuracy, { glyph: string; cls: string; label: string }> = {
-  exact: { glyph: "●", cls: "text-foreground", label: "Conteo exacto con el tokenizador del modelo" },
-  approx: { glyph: "●", cls: "text-faint", label: "Conteo aproximado con un tokenizador de la misma línea" },
-  calibrated: { glyph: "●", cls: "text-green", label: "Calibrado con la API del proveedor" },
-  estimate: { glyph: "○", cls: "text-muted-foreground", label: "Estimado: el proveedor no publica su tokenizador" },
+  exact: {
+    glyph: "●",
+    cls: "text-foreground",
+    label: "Conteo exacto con el tokenizador del modelo",
+  },
+  approx: {
+    glyph: "●",
+    cls: "text-faint",
+    label: "Conteo aproximado con un tokenizador de la misma línea",
+  },
+  calibrated: {
+    glyph: "●",
+    cls: "text-green",
+    label: "Calibrado con la API del proveedor",
+  },
+  estimate: {
+    glyph: "○",
+    cls: "text-muted-foreground",
+    label: "Estimado: el proveedor no publica su tokenizador",
+  },
 };
 
 function sortValue(row: Row, key: SortKey): number | string {
@@ -81,7 +88,11 @@ interface Props {
 }
 
 export function ResultsTable({ rows, analysis, pinned, onTogglePin, onOpen, refine }: Props) {
-  const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: "monthly", dir: "asc" });
+  const { t } = usePreferences();
+  const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({
+    key: "monthly",
+    dir: "asc",
+  });
   const [limit, setLimit] = useState(FIRST_PAGE);
 
   const frontier = useMemo(() => new Set(analysis.frontier.map((r) => r.model.id)), [analysis.frontier]);
@@ -109,7 +120,10 @@ export function ResultsTable({ rows, analysis, pinned, onTogglePin, onOpen, refi
     setSort((s) =>
       s.key === key
         ? { key, dir: s.dir === "asc" ? "desc" : "asc" }
-        : { key, dir: key === "name" || key === "monthly" || key === "perRequest" || key === "tokens" ? "asc" : "desc" },
+        : {
+            key,
+            dir: key === "name" || key === "monthly" || key === "perRequest" || key === "tokens" ? "asc" : "desc",
+          },
     );
   };
 
@@ -127,7 +141,7 @@ export function ResultsTable({ rows, analysis, pinned, onTogglePin, onOpen, refi
           sort.key === key ? "text-foreground" : "text-muted-foreground",
         )}
       >
-        {label}
+        {t(label)}
         {sort.key === key && <Sym className="text-[11px]">{sort.dir === "asc" ? "↑" : "↓"}</Sym>}
       </button>
     </TableHead>
@@ -136,9 +150,9 @@ export function ResultsTable({ rows, analysis, pinned, onTogglePin, onOpen, refi
   if (rows.length === 0) {
     return (
       <div className="rounded-[28px] bg-card p-12 text-center">
-        <p className="role-title text-lg">Ningún modelo cumple tus filtros</p>
+        <p className="role-title text-lg">{t("Ningún modelo cumple tus filtros")}</p>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          Relaja la calidad mínima, el presupuesto o el contexto para ver más opciones.
+          {t("Relaja la calidad mínima, el presupuesto o el contexto para ver más opciones.")}
         </p>
       </div>
     );
@@ -153,17 +167,17 @@ export function ResultsTable({ rows, analysis, pinned, onTogglePin, onOpen, refi
         <TableHeader>
           <TableRow>
             <TableHead className="w-10 px-1 @lg:px-2" />
-            {head("name", "Modelo")}
+            {head("name", t("Modelo"))}
             {head("tokens", "Tokens", "hidden text-right @lg:table-cell")}
             {head("perRequest", "$ / solicitud", "hidden text-right @2xl:table-cell")}
             {head("monthly", "$ / mes", "text-right")}
             <TableHead
               className="role-label hidden px-2 text-right @3xl:table-cell"
-              title="Cuántas veces cuesta más que el modelo más barato de esta vista"
+              title={t("Cuántas veces cuesta más que el modelo más barato de esta vista")}
             >
-              × mínimo
+              {t("× mínimo")}
             </TableHead>
-            {head("intelligence", "Índice", "text-right")}
+            {head("intelligence", t("Índice"), "text-right")}
             {head("context", "Contexto", "hidden text-right @2xl:table-cell")}
           </TableRow>
         </TableHeader>
@@ -186,11 +200,13 @@ export function ResultsTable({ rows, analysis, pinned, onTogglePin, onOpen, refi
       <RefineBar rows={shown} refine={refine} />
       <div className="flex flex-wrap items-center justify-between gap-3 px-2 pt-4">
         <p className="num text-xs text-muted-foreground">
-          {Math.min(limit, sorted.length)} de {sorted.length} modelos
+          {t("{0} de {1} modelos", [Math.min(limit, sorted.length), sorted.length])}
         </p>
         {limit < sorted.length && (
           <Button variant="outline" size="sm" onClick={() => setLimit((l) => l + STEP)}>
-            Mostrar {Math.min(STEP, sorted.length - limit)} más <Sym>↓</Sym>
+            {t("Mostrar ")}
+            {Math.min(STEP, sorted.length - limit)} {t(" más ")}
+            <Sym>↓</Sym>
           </Button>
         )}
       </div>
@@ -199,9 +215,27 @@ export function ResultsTable({ rows, analysis, pinned, onTogglePin, onOpen, refi
 }
 
 const CAPS = [
-  { key: "reason", label: "razona", cls: "bg-purple/15", on: (m: Row["model"]) => m.reasoning === "default" || m.reasoning === "mandatory", tip: "Razona por defecto" },
-  { key: "vision", label: "visión", cls: "bg-blue/15", on: (m: Row["model"]) => m.inputModalities.includes("image"), tip: "Acepta imágenes" },
-  { key: "open", label: "abierto", cls: "bg-orange/20", on: (m: Row["model"]) => m.openWeights, tip: "Pesos abiertos" },
+  {
+    key: "reason",
+    label: "razona",
+    cls: "bg-purple/15",
+    on: (m: Row["model"]) => m.reasoning === "default" || m.reasoning === "mandatory",
+    tip: "Razona por defecto",
+  },
+  {
+    key: "vision",
+    label: "visión",
+    cls: "bg-blue/15",
+    on: (m: Row["model"]) => m.inputModalities.includes("image"),
+    tip: "Acepta imágenes",
+  },
+  {
+    key: "open",
+    label: "abierto",
+    cls: "bg-orange/20",
+    on: (m: Row["model"]) => m.openWeights,
+    tip: "Pesos abiertos",
+  },
 ] as const;
 
 function ModelRow({
@@ -224,6 +258,7 @@ function ModelRow({
   onTogglePin: (id: string) => void;
   onOpen: (row: Row) => void;
 }) {
+  const { t } = usePreferences();
   const m = row.model;
   const acc = ACCURACY[row.accuracy];
   const daysLeft = m.expiresAt && now > 0 ? Math.ceil((Date.parse(m.expiresAt) - now) / 86_400_000) : null;
@@ -235,7 +270,7 @@ function ModelRow({
         <button
           type="button"
           aria-pressed={isPinned}
-          aria-label={isPinned ? `Quitar ${m.name} de fijados` : `Fijar ${m.name}`}
+          aria-label={isPinned ? t("Quitar {0} de fijados", [m.name]) : t("Fijar {0}", [m.name])}
           onClick={(e) => {
             e.stopPropagation();
             onTogglePin(m.id);
@@ -263,24 +298,26 @@ function ModelRow({
           <span>{m.vendor}</span>
           {isFrontier && (
             <span className="inline-flex items-center gap-1 rounded-full bg-signal-soft px-2 py-px text-[10.5px] font-bold text-signal-ink">
-              <Sym>●</Sym> frontera
+              <Sym>●</Sym> {t(" frontera")}
             </span>
           )}
           {retiring && (
             <span className="inline-flex items-center gap-1 rounded-full bg-orange/20 px-2 py-px text-[10.5px] font-bold">
-              <Sym>⚠</Sym> {daysLeft! <= 0 ? "retirado" : `se retira en ${daysLeft} d`}
+              <Sym>⚠</Sym> {daysLeft! <= 0 ? t("retirado") : t("se retira en {0} d", [daysLeft])}
             </span>
           )}
-          {m.free && <span className="rounded-full bg-secondary px-2 py-px text-[10.5px] font-semibold">gratis</span>}
+          {m.free && (
+            <span className="rounded-full bg-secondary px-2 py-px text-[10.5px] font-semibold">{t("gratis")}</span>
+          )}
           <span className="hidden items-center gap-1 @4xl:inline-flex">
             {CAPS.filter((c) => c.on(m)).map((c) => (
               <Tooltip key={c.key}>
                 <TooltipTrigger asChild>
                   <span className={cn("rounded-full px-2 py-px text-[10.5px] font-semibold text-foreground", c.cls)}>
-                    {c.label}
+                    {t(c.label)}
                   </span>
                 </TooltipTrigger>
-                <TooltipContent>{c.tip}</TooltipContent>
+                <TooltipContent>{t(c.tip)}</TooltipContent>
               </Tooltip>
             ))}
           </span>
@@ -292,11 +329,13 @@ function ModelRow({
             <span className="inline-flex items-center justify-end gap-1.5">
               {formatTokens(row.promptTokens)}
               <Sym className={cn("text-[10px]", acc.cls)}>{acc.glyph}</Sym>
-              <span className="sr-only">{acc.label}</span>
+              <span className="sr-only">{t(acc.label)}</span>
             </span>
           </TooltipTrigger>
           <TooltipContent className="max-w-60">
-            {acc.label}. Tokenizador: {isRepoEngine(row.engine) ? "propio del modelo" : TOKENIZERS[m.tokenizer].label}.
+            {t(acc.label)}
+            {t(". Tokenizador: ")}
+            {isRepoEngine(row.engine) ? t("propio del modelo") : TOKENIZERS[m.tokenizer].label}.
           </TooltipContent>
         </Tooltip>
       </TableCell>

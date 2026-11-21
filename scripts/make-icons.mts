@@ -15,15 +15,8 @@ const root = fileURLToPath(new URL("..", import.meta.url));
 const at = (path: string) => join(root, path);
 const master = at("brand/icon.png");
 
-/**
- * The mark covers about two thirds of the master's width. That is too small to
- * read in a browser tab, so tab-sized icons use a square crop where it fills
- * about 88%. Everything outside the mark is black, so the crop is seamless.
- */
-const TIGHT = { size: 945, top: 141, left: 131 };
-
-/** Corner radius of the tab icons, as a share of their side: the same soft square as an app icon. */
-const CORNER = 0.22;
+/** Match the footer: preserve the master's padding and its 13px radius at 44px. */
+const CORNER = 13 / 44;
 
 const sips = (...args: string[]) => execFileSync("sips", args, { stdio: "ignore" });
 const resize = (from: string, px: number, to: string) =>
@@ -131,17 +124,10 @@ function ico(images: { px: number; png: Buffer }[]): Buffer {
 
 const work = mkdtempSync(join(tmpdir(), "tokenometro-icons-"));
 try {
-  const tight = join(work, "tight.png");
-  sips(
-    "-c", String(TIGHT.size), String(TIGHT.size),
-    "--cropOffset", String(TIGHT.top), String(TIGHT.left),
-    master, "--out", tight,
-  );
-
-  /** The tab icon at `px`: the tight crop, resized, with rounded transparent corners. */
+  /** Tab icons keep the same framing as the footer instead of zooming into the mark. */
   const tab = (px: number) => {
     const file = join(work, `tab-${px}.bmp`);
-    sips("-z", String(px), String(px), "-s", "format", "bmp", tight, "--out", file);
+    sips("-z", String(px), String(px), "-s", "format", "bmp", master, "--out", file);
     const pixels = readBmp(readFileSync(file));
     return encodePng(pixels.px, roundCorners(pixels));
   };

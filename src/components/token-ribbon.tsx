@@ -1,5 +1,6 @@
 "use client";
 
+import { usePreferences } from "@/components/preferences-provider";
 import { cn } from "cn";
 import { Sym } from "@/components/sym";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,7 @@ export function TokenRibbon({
   hasSamples,
   calibrate,
 }: Props) {
+  const { t, tError } = usePreferences();
   const rows = engineIds
     .filter((id) => totals[id] !== undefined && pieces[id]?.excerpt === excerpt)
     .sort((a, b) => (totals[a] ?? 0) - (totals[b] ?? 0));
@@ -70,33 +72,36 @@ export function TokenRibbon({
     <section className="rounded-[32px] bg-card p-6 sm:p-8" aria-labelledby="ribbon-title">
       <header>
         <h2 id="ribbon-title" className="text-[26px] leading-[1.05] sm:text-[32px]">
-          <span className="role-display">Mismo texto,</span>{" "}
-          <span className="role-thin">distintos cortes</span>
+          <span className="role-display">{t("Mismo texto,")}</span>{" "}
+          <span className="role-thin">{t("distintos cortes")}</span>
         </h2>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
-          Cada modelo trocea tu texto a su manera. Menos cortes son menos tokens, y los tokens son lo que se
-          factura.
+          {t(
+            "Cada modelo trocea tu texto a su manera. Menos cortes son menos tokens, y los tokens son lo que se factura.",
+          )}
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
           {idle.length > 0 && loading.length === 0 && (
             <Button size="sm" onClick={onLoadAll}>
-              <Sym>↓</Sym> Cargar tokenizadores reales
+              <Sym>↓</Sym> {t(" Cargar tokenizadores reales")}
               <span className="num text-[11px] font-normal opacity-60">≈{HF_TOTAL_MB} MB</span>
             </Button>
           )}
           {loading.length > 0 && (
             <p className="flex items-center gap-2 text-sm text-muted-foreground" role="status">
               <Sym className="animate-pulse text-blue">●</Sym>
-              Descargando {loading.map(({ id }) => TOKENIZERS[id].label).join(", ")}…
+              {t("Descargando ")}
+              {loading.map(({ id }) => TOKENIZERS[id].label).join(", ")}…
             </p>
           )}
           {idle.length === 0 && loading.length === 0 && failed.length === 0 && (
             <p className="flex items-center gap-1.5 text-sm font-semibold text-signal-ink">
-              <Sym>✓</Sym> Tokenizadores reales cargados
+              <Sym>✓</Sym> {t(" Tokenizadores reales cargados")}
             </p>
           )}
           <p className="num text-xs text-muted-foreground">
-            {exactModels} de {totalModels} modelos con conteo exacto
+            {exactModels} {t(" de ")}
+            {totalModels} {t(" modelos con conteo exacto")}
             {ready.length > 0 && idle.length > 0 ? ` · ${ready.length}/${HF_IDS.length} familias` : ""}
           </p>
         </div>
@@ -105,10 +110,10 @@ export function TokenRibbon({
       <div className="mt-6">
         {!hasSamples ? (
           <p className="py-6 text-sm text-muted-foreground">
-            Agrega un texto en el paso 1 para ver cómo lo corta cada tokenizador.
+            {t("Agrega un texto en el paso 1 para ver cómo lo corta cada tokenizador.")}
           </p>
         ) : rows.length === 0 ? (
-          <div className="grid gap-3" aria-busy="true" aria-label="Cortando el texto">
+          <div className="grid gap-3" aria-busy="true" aria-label={t("Cortando el texto")}>
             {[0, 1].map((i) => (
               <div key={i} className="h-14 animate-pulse rounded-2xl bg-secondary" />
             ))}
@@ -129,8 +134,8 @@ export function TokenRibbon({
         )}
         {hasSamples && rows.length > 0 && (
           <p className="pt-3 text-xs text-muted-foreground">
-            Vista previa de los primeros {excerpt.length} caracteres. Las cifras cuentan el texto completo,
-            por solicitud.
+            {t("Vista previa de los primeros ")}
+            {excerpt.length} {t(" caracteres. Las cifras cuentan el texto completo, por solicitud.")}
           </p>
         )}
       </div>
@@ -141,14 +146,15 @@ export function TokenRibbon({
             <p key={id} className="flex flex-wrap items-center gap-2" role="alert">
               <Sym className="text-destructive">⚠</Sym>
               <span>
-                No se pudo cargar <strong>{TOKENIZERS[id].label}</strong>: {s.error ?? "error de red"}.
+                {t("No se pudo cargar ")}
+                <strong>{TOKENIZERS[id].label}</strong>: {tError(s.error ?? "error de red")}.
               </span>
               <button
                 type="button"
                 className="font-semibold underline underline-offset-2 hover:no-underline"
                 onClick={() => onRetry(id)}
               >
-                Reintentar
+                {t("Reintentar")}
               </button>
             </p>
           ))}
@@ -157,7 +163,7 @@ export function TokenRibbon({
 
       {hasSamples && estimates.length > 0 && (
         <footer className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
-          <p className="role-label text-muted-foreground">Sin tokenizador público</p>
+          <p className="role-label text-muted-foreground">{t("Sin tokenizador público")}</p>
           <ul className="flex flex-wrap gap-2">
             {estimates.map((e) => (
               <li key={e.id}>
@@ -169,18 +175,23 @@ export function TokenRibbon({
                         e.accuracy === "calibrated" && "bg-signal-soft",
                       )}
                     >
-                      <span className="font-semibold">{TOKENIZERS[e.id].label}</span>
+                      <span className="font-semibold">{t(TOKENIZERS[e.id].label)}</span>
                       <span className="font-bold">
                         {e.accuracy === "calibrated" ? "" : "≈ "}
                         {formatInt(e.tokens)}
                       </span>
                       <span className="text-muted-foreground">
-                        {e.accuracy === "calibrated" ? "calibrado" : e.accuracy === "approx" ? "aprox." : "estimado"}
+                        {e.accuracy === "calibrated"
+                          ? t("calibrado")
+                          : e.accuracy === "approx"
+                            ? t("aprox.")
+                            : t("estimado")}
                       </span>
                     </span>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-64">
-                    {TOKENIZERS[e.id].note ?? "Estimado a partir de o200k."} Afecta a {e.models} modelos.
+                    {t(TOKENIZERS[e.id].note ?? "Estimado a partir de o200k.")} {t(" Afecta a ")}
+                    {e.models} {t(" modelos.")}
                   </TooltipContent>
                 </Tooltip>
               </li>
@@ -206,13 +217,14 @@ function RibbonRow({
   best: number;
   isBest: boolean;
 }) {
+  const { t } = usePreferences();
   const spec = TOKENIZERS[id];
   const delta = best > 0 ? Math.round((total / best - 1) * 100) : 0;
   return (
     <li className="grid items-start gap-x-6 gap-y-2 py-3.5 sm:grid-cols-[136px_minmax(0,1fr)_124px]">
       <div className="leading-tight">
-        <p className="text-[13px] font-bold [font-variation-settings:'ROND'_85]">{spec.label}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{spec.covers}</p>
+        <p className="text-[13px] font-bold [font-variation-settings:'ROND'_85]">{t(spec.label)}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t(spec.covers)}</p>
       </div>
       {/* Each token is a pill; colors cycle so every cut is visible. Raw text: no "->" arrows. */}
       <p aria-hidden className="raw cut-in text-[14px] leading-[2.15] break-words whitespace-pre-wrap">
@@ -229,17 +241,16 @@ function RibbonRow({
       <div className="flex items-baseline justify-between gap-2 sm:block sm:text-right">
         <div className="num-lg text-[30px] leading-none">
           {formatInt(total)}
-          <span className="sr-only"> tokens con {spec.label}</span>
+          <span className="sr-only">
+            {" "}
+            {t(" tokens con ")}
+            {t(spec.label)}
+          </span>
         </div>
-        <div
-          className={cn(
-            "mt-1.5 text-xs",
-            isBest ? "font-bold text-signal-ink" : "text-muted-foreground",
-          )}
-        >
+        <div className={cn("mt-1.5 text-xs", isBest ? "font-bold text-signal-ink" : "text-muted-foreground")}>
           {isBest ? (
             <>
-              <Sym>●</Sym> menos tokens
+              <Sym>●</Sym> {t(" menos tokens")}
             </>
           ) : (
             <>

@@ -50,7 +50,7 @@ function SelectTrigger({
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <Sym className="pointer-events-none text-base text-muted-foreground">⌄</Sym>
+        <Sym className="pointer-events-none shrink-0 text-base text-muted-foreground">⌄</Sym>
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )

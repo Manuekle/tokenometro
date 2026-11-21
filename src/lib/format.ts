@@ -1,3 +1,6 @@
+import { translate } from "@/lib/i18n";
+import type { Language } from "@/lib/preferences";
+
 /**
  * Number formatting. Fixed en-US locale on purpose: server and client must
  * render identical strings (no hydration mismatch) and prices are USD.
@@ -61,13 +64,14 @@ export function formatMultiple(n: number): string {
   return n >= 10 ? `${Math.round(n)}×` : `${n.toFixed(1)}×`;
 }
 
-/** "hace 5 min" style relative time, in Spanish. */
-export function timeAgo(iso: string, now = Date.now()): string {
+/** Relative time in the selected language. */
+export function timeAgo(iso: string, now = Date.now(), language: Language = "es"): string {
+  const t = (message: string, values?: readonly (string | number)[]) => translate(language, message, values);
   const seconds = Math.max(0, Math.round((now - Date.parse(iso)) / 1000));
-  if (seconds < 60) return "hace un momento";
+  if (seconds < 60) return t("hace un momento");
   const minutes = Math.round(seconds / 60);
-  if (minutes < 60) return `hace ${minutes} min`;
+  if (minutes < 60) return t("hace {0} min", [minutes]);
   const hours = Math.round(minutes / 60);
-  if (hours < 48) return `hace ${hours} h`;
-  return `hace ${Math.round(hours / 24)} días`;
+  if (hours < 48) return t("hace {0} h", [hours]);
+  return t("hace {0} días", [Math.round(hours / 24)]);
 }
