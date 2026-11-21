@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { SITE, basePath, siteUrl } from "@/lib/site";
 
+export const dynamic = "force-static";
+
 export default function manifest(): MetadataRoute.Manifest {
   // On GitHub Pages the site lives under /<repo>/, and these paths are not rewritten for us.
   const base = basePath(siteUrl());
