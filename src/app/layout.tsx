@@ -2,13 +2,17 @@ import type { Metadata, Viewport } from "next";
 import "allo-font"; // the variable font (wght, ROND, opsz) and its obliques
 import { SiteFooter } from "@/components/site-footer";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SITE, siteUrl } from "@/lib/site";
+import { SITE, homeUrl, siteUrl } from "@/lib/site";
 import "./globals.css";
+
+const publicUrl = siteUrl();
+const canonical = homeUrl(publicUrl);
 
 // The icons, the Open Graph image, robots.txt, the sitemap and the web manifest
 // come from the files next to this one (icon.png, opengraph-image.png, robots.ts…).
 export const metadata: Metadata = {
-  metadataBase: siteUrl(),
+  // Next.js already adds basePath to file-based metadata such as the social image.
+  metadataBase: new URL(publicUrl.origin),
   title: { default: SITE.title, template: `%s · ${SITE.name}` },
   description: SITE.description,
   applicationName: SITE.name,
@@ -16,10 +20,10 @@ export const metadata: Metadata = {
   appleWebApp: { title: SITE.name },
   keywords: [...SITE.keywords],
   category: "technology",
-  alternates: { canonical: "/" },
+  alternates: { canonical },
   openGraph: {
     type: "website",
-    url: "/",
+    url: canonical,
     siteName: SITE.name,
     locale: SITE.locale,
     title: SITE.title,

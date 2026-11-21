@@ -40,13 +40,13 @@ describe("siteUrl", () => {
 });
 
 describe("homeUrl", () => {
-  it("drops the trailing slash, as the canonical link does", () => {
-    expect(homeUrl(new URL("https://tokenometro.example"))).toBe("https://tokenometro.example");
-    expect(homeUrl(new URL("https://tokenometro.example/"))).toBe("https://tokenometro.example");
+  it("normalizes the canonical URL with a trailing slash", () => {
+    expect(homeUrl(new URL("https://tokenometro.example"))).toBe("https://tokenometro.example/");
+    expect(homeUrl(new URL("https://tokenometro.example/"))).toBe("https://tokenometro.example/");
   });
 
-  it("keeps a base path", () => {
-    expect(homeUrl(new URL("https://example.com/start/here/"))).toBe("https://example.com/start/here");
+  it("keeps the GitHub Pages base path", () => {
+    expect(homeUrl(new URL("https://manuekle.github.io/tokenometro"))).toBe("https://manuekle.github.io/tokenometro/");
   });
 });
 
@@ -62,7 +62,7 @@ describe("webApplicationLd", () => {
 
   it("describes a free web application at the site's address", () => {
     expect(ld["@type"]).toBe("WebApplication");
-    expect(ld.url).toBe("https://tokenometro.example");
+    expect(ld.url).toBe("https://tokenometro.example/");
     expect(ld.isAccessibleForFree).toBe(true);
     expect(ld.offers.price).toBe("0");
     expect(ld.inLanguage).toBe("es");

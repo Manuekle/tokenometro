@@ -48,12 +48,8 @@ export function siteUrl(env: Record<string, string | undefined> = process.env): 
 /** The path the site is served under: "" on a domain of its own, "/tokenometro" on GitHub Pages. */
 export const basePath = (url: URL): string => url.pathname.replace(/\/+$/, "");
 
-/**
- * The home page's address the way the canonical link spells it: no trailing
- * slash. The sitemap and the structured data use the same spelling, so search
- * engines see one address everywhere.
- */
-export const homeUrl = (url: URL): string => url.href.replace(/\/$/, "");
+/** Canonical homepage URL, including the directory slash used by GitHub Pages. */
+export const homeUrl = (url: URL): string => new URL(`${basePath(url)}/`, url).href;
 
 /** Structured data for search engines: what this page is, in schema.org terms. */
 export function webApplicationLd(url: URL) {

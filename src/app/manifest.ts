@@ -1,7 +1,10 @@
 import type { MetadataRoute } from "next";
 import { SITE, basePath, siteUrl } from "@/lib/site";
 
-export const dynamic = "force-static";
+// Prerender this metadata route with Cache Components enabled (Next.js 16.4).
+export function generateStaticParams() {
+  return [{}];
+}
 
 export default function manifest(): MetadataRoute.Manifest {
   // On GitHub Pages the site lives under /<repo>/, and these paths are not rewritten for us.

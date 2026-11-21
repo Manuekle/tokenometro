@@ -128,17 +128,12 @@ cuanto más larga la columna de resultados (más filas de la tabla, la vista Com
 
 ## Publicar en GitHub Pages
 
-**Estado: sin terminar.** `pnpm build:pages` hoy falla en `/sitemap.xml`: la exportación estática pide
-`export const dynamic = "force-static"` en `sitemap`, `robots` y `manifest`, y con `cacheComponents` activado Next no
-lo admite (rompe también el build normal). Hay que resolver esa incompatibilidad antes de publicar. Lo que sigue es lo
-que ya está escrito y sin probar.
-
 `.github/workflows/pages.yml` construye el sitio como archivos estáticos (`pnpm build:pages`, que usa
 `NEXT_OUTPUT=export`) y lo publica en `https://<usuario>.github.io/<repo>/`. De esa dirección sale el prefijo `/<repo>`
-de todas las rutas (`NEXT_PUBLIC_SITE_URL`, que el workflow arma solo). En el repo: Settings → Pages → Source:
-**GitHub Actions**. Los precios se leen de OpenRouter al construir, así que el workflow también corre cada 6 horas.
-Para probarlo en local:
-`NEXT_PUBLIC_SITE_URL=https://usuario.github.io/repo pnpm build:pages` y servir `out/` bajo `/repo/`.
+de todas las rutas (`NEXT_PUBLIC_SITE_URL`, que el workflow arma solo). En Settings → Pages, elige **GitHub Actions**
+como fuente. Los precios se leen de OpenRouter al construir, así que el workflow también corre cada 6 horas.
+Para probarlo en local, ejecuta
+`NEXT_PUBLIC_SITE_URL=https://usuario.github.io/repo pnpm build:pages` y sirve `out/` bajo `/repo/`.
 
 ## Límites
 
