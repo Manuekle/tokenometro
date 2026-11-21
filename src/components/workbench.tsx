@@ -1,5 +1,6 @@
 "use client";
 
+import { usePreferences } from "@/components/preferences-provider";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CalibrateDialog } from "@/components/calibrate-dialog";
 import { CompareView } from "@/components/compare-view";
@@ -30,12 +31,7 @@ import { makeExcerpt } from "@/lib/excerpt";
 import { formatInt } from "@/lib/format";
 import { DEFAULT_PRESET, PRESETS, type Preset } from "@/lib/presets";
 import type { RefineApi } from "@/lib/refine";
-import {
-  TOKENIZER_IDS,
-  TOKENIZERS,
-  repoEngineId,
-  type TokenizerId,
-} from "@/lib/tokenizers/registry";
+import { TOKENIZER_IDS, TOKENIZERS, repoEngineId, type TokenizerId } from "@/lib/tokenizers/registry";
 import { mean, resolveFamilyTokens, type Calibration } from "@/lib/tokenizers/resolve";
 import { useSegments } from "@/lib/tokenizers/use-segments";
 import { MAX_REPOS, useTokenCounts } from "@/lib/tokenizers/use-token-counts";
@@ -67,6 +63,7 @@ interface Stored {
 }
 
 export function Workbench({ catalog }: { catalog: Catalog }) {
+  const { t } = usePreferences();
   const [samples, setSamples] = useState<AppSample[]>(() => presetSamples(DEFAULT_PRESET, false));
   const [workload, setWorkload] = useState<WorkloadState>(() => ({
     ...DEFAULT_WORKLOAD,
@@ -217,7 +214,17 @@ export function Workbench({ catalog }: { catalog: Catalog }) {
       const taken = new Set(prev.map((s) => s.name));
       let unique = name;
       for (let n = 2; taken.has(unique); n++) unique = `${name} ${n}`;
-      return [...prev, { id: crypto.randomUUID(), name: unique, text, rev: 0, kind, fromFile }];
+      return [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          name: unique,
+          text,
+          rev: 0,
+          kind,
+          fromFile,
+        },
+      ];
     });
   }, []);
   const editSample = useCallback((id: string, text: string) => {
@@ -305,15 +312,16 @@ export function Workbench({ catalog }: { catalog: Catalog }) {
       {/* The headline plays Allo's axes against each other: thin and sharp, black and round. */}
       <div className="pt-10 pb-14 sm:pt-16 sm:pb-20">
         <h1 className="max-w-4xl text-[44px] leading-[0.98] sm:text-[72px]">
-          <span className="role-thin">¿Cuánto cuesta</span>{" "}
-          <span className="role-display text-blue">tu texto</span>{" "}
-          <span className="role-thin">en cada</span>{" "}
-          <span className="role-display text-pink">modelo</span>
+          <span className="role-thin">{t("¿Cuánto cuesta")}</span>{" "}
+          <span className="role-display text-blue">{t("tu texto")}</span>{" "}
+          <span className="role-thin">{t("en cada")}</span>{" "}
+          <span className="role-display text-pink">{t("modelo")}</span>
           <span className="role-display">?</span>
         </h1>
         <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          Cuenta tokens con el tokenizador real de cada modelo y proyecta el gasto mensual de tu API con tu propia
-          carga. Todo se calcula en este navegador.
+          {t(
+            "Cuenta tokens con el tokenizador real de cada modelo y proyecta el gasto mensual de tu API con tu propia carga. Todo se calcula en este navegador.",
+          )}
         </p>
       </div>
 
@@ -359,7 +367,7 @@ export function Workbench({ catalog }: { catalog: Catalog }) {
           />
 
           {waiting ? (
-            <div className="grid gap-3" aria-busy="true" aria-label="Calculando costos">
+            <div className="grid gap-3" aria-busy="true" aria-label={t("Calculando costos")}>
               <div className="grid gap-3 sm:grid-cols-3">
                 {[0, 1, 2].map((i) => (
                   <div key={i} className="h-40 animate-pulse rounded-[28px] bg-card" />
@@ -381,12 +389,13 @@ export function Workbench({ catalog }: { catalog: Catalog }) {
                 onCompare={() => setTab("compare")}
               />
               <Tabs value={tab} onValueChange={setTab} className="gap-4">
-                <TabsList className="w-full sm:w-fit">
-                  <TabsTrigger value="table">Tabla</TabsTrigger>
-                  <TabsTrigger value="cost">Costos</TabsTrigger>
-                  <TabsTrigger value="frontier">Calidad × costo</TabsTrigger>
+                <TabsList className="grid h-auto w-full grid-cols-2 rounded-3xl *:min-h-9 sm:h-11 sm:grid-cols-4 sm:rounded-full">
+                  <TabsTrigger value="table">{t("Tabla")}</TabsTrigger>
+                  <TabsTrigger value="cost">{t("Costos")}</TabsTrigger>
+                  <TabsTrigger value="frontier">{t("Calidad × costo")}</TabsTrigger>
                   <TabsTrigger value="compare">
-                    Comparar{pinned.size > 0 && <span className="num text-muted-foreground">{pinned.size}</span>}
+                    {t("Comparar")}
+                    {pinned.size > 0 && <span className="num text-muted-foreground">{pinned.size}</span>}
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="table">
@@ -411,7 +420,7 @@ export function Workbench({ catalog }: { catalog: Catalog }) {
                     pinnedTotal={pinned.size}
                     candidates={allRows}
                     picks={pickRows}
-                    heading={`${formatInt(perMonth)} solicitudes al mes`}
+                    heading={t("{0} solicitudes al mes", [formatInt(perMonth)])}
                     refine={refineApi}
                     onAdd={pinModel}
                     onRemove={unpinModel}

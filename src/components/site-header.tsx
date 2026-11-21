@@ -1,19 +1,24 @@
 "use client";
 
+import { usePreferences } from "@/components/preferences-provider";
 import { useEffect, useState } from "react";
 import { cn } from "cn";
 import { MethodologyDialog } from "@/components/methodology-dialog";
 import { Sym } from "@/components/sym";
+import type { Language } from "@/lib/preferences";
 import { timeAgo } from "@/lib/format";
 
-const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+const MONTHS = {
+  es: ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"],
+  en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+};
 
 /** Deterministic (UTC, hand-built) so server and client render the same text. */
-function utcStamp(iso: string): string {
+function utcStamp(iso: string, language: Language): string {
   const d = new Date(iso);
   const hh = String(d.getUTCHours()).padStart(2, "0");
   const mm = String(d.getUTCMinutes()).padStart(2, "0");
-  return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${hh}:${mm} UTC`;
+  return `${d.getUTCDate()} ${MONTHS[language][d.getUTCMonth()]} ${hh}:${mm} UTC`;
 }
 
 interface Props {
@@ -23,6 +28,7 @@ interface Props {
 }
 
 export function SiteHeader({ source, fetchedAt, modelCount }: Props) {
+  const { t, language } = usePreferences();
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     const tick = () => setNow(Date.now());
@@ -40,9 +46,9 @@ export function SiteHeader({ source, fetchedAt, modelCount }: Props) {
         <p className="flex items-center gap-2 text-xs text-muted-foreground" role="status">
           <Sym className={cn("text-[10px]", source === "live" ? "text-green" : "text-orange")}>●</Sym>
           <span>
-            <span className="num font-semibold text-foreground">{modelCount}</span> modelos ·{" "}
-            {source === "live" ? "precios de OpenRouter" : "copia local de precios"} ·{" "}
-            <time dateTime={fetchedAt}>{now ? timeAgo(fetchedAt, now) : utcStamp(fetchedAt)}</time>
+            <span className="num font-semibold text-foreground">{modelCount}</span> {t(" modelos ·")}{" "}
+            {source === "live" ? t("precios de OpenRouter") : t("copia local de precios")} ·{" "}
+            <time dateTime={fetchedAt}>{now ? timeAgo(fetchedAt, now, language) : utcStamp(fetchedAt, language)}</time>
           </span>
         </p>
         <MethodologyDialog />

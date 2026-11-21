@@ -1,3 +1,5 @@
+import { translate, type MessageValues } from "@/lib/i18n";
+import type { Language } from "@/lib/preferences";
 import type { Row } from "@/lib/compute-rows";
 import {
   formatContext,
@@ -180,7 +182,8 @@ export function compareContext(rows: Row[]): CompareContext {
 }
 
 /** A few plain sentences that say what the table below means. */
-export function summarize(rows: Row[]): string[] {
+export function summarize(rows: Row[], language: Language = "es"): string[] {
+  const t = (message: string, values?: MessageValues) => translate(language, message, values);
   if (rows.length < 2) return [];
   const lines: string[] = [];
   const byCost = [...rows].sort((a, b) => a.monthly - b.monthly);
@@ -189,10 +192,10 @@ export function summarize(rows: Row[]): string[] {
 
   if (cheapest.monthly > 0 && priciest.monthly / cheapest.monthly >= 1.05) {
     lines.push(
-      `${cheapest.model.name} es el más barato (${formatUSD(cheapest.monthly)} al mes). ${priciest.model.name} cuesta ${formatMultiple(priciest.monthly / cheapest.monthly)} más.`,
+      t("{0} es el más barato ({1} al mes). {2} cuesta {3} más.", [cheapest.model.name, formatUSD(cheapest.monthly), priciest.model.name, formatMultiple(priciest.monthly / cheapest.monthly)]),
     );
   } else {
-    lines.push(`Cuestan casi lo mismo: ${formatUSD(cheapest.monthly)} al mes.`);
+    lines.push(t("Cuestan casi lo mismo: {0} al mes.", [formatUSD(cheapest.monthly)]));
   }
 
   const scored = rows.filter((r) => r.model.intelligence !== null);
@@ -200,12 +203,12 @@ export function summarize(rows: Row[]): string[] {
     const best = scored.reduce((a, b) =>
       (b.model.intelligence as number) > (a.model.intelligence as number) ? b : a,
     );
-    lines.push(`${best.model.name} tiene el mayor índice de inteligencia (${formatIndex(best.model.intelligence)}).`);
+    lines.push(t("{0} tiene el mayor índice de inteligencia ({1}).", [best.model.name, formatIndex(best.model.intelligence)]));
     const base = cheapest.model.intelligence;
     const gain = base === null ? 0 : (best.model.intelligence as number) - base;
     if (best !== cheapest && gain > 0) {
       lines.push(
-        `Pasar de ${cheapest.model.name} a ${best.model.name} suma ${Number(gain.toFixed(1))} puntos de índice por ${formatUSD(best.monthly - cheapest.monthly)} más al mes.`,
+        t("Pasar de {0} a {1} suma {2} puntos de índice por {3} más al mes.", [cheapest.model.name, best.model.name, Number(gain.toFixed(1)), formatUSD(best.monthly - cheapest.monthly)]),
       );
     }
   }
@@ -216,7 +219,7 @@ export function summarize(rows: Row[]): string[] {
     const hi = Math.max(...tokens);
     if (hi / lo >= 1.02) {
       lines.push(
-        `La misma solicitud pesa de ${formatTokens(lo)} a ${formatTokens(hi)} tokens según el tokenizador (${Math.round((hi / lo - 1) * 100)}% de diferencia).`,
+        t("La misma solicitud pesa de {0} a {1} tokens según el tokenizador ({2}% de diferencia).", [formatTokens(lo), formatTokens(hi), Math.round((hi / lo - 1) * 100)]),
       );
     }
   }
@@ -224,7 +227,8 @@ export function summarize(rows: Row[]): string[] {
 }
 
 /** GitHub-flavored Markdown table, cheapest model first, ready to paste into a doc. */
-export function toMarkdown(rows: Row[], heading: string): string {
+export function toMarkdown(rows: Row[], heading: string, language: Language = "es"): string {
+  const t = (message: string) => translate(language, message);
   const sorted = [...rows].sort((a, b) => a.monthly - b.monthly);
   const ctx = compareContext(sorted);
   const cell = (text: string) => text.replace(/\|/g, "\\|");
@@ -235,9 +239,9 @@ export function toMarkdown(rows: Row[], heading: string): string {
     `|---|${sorted.map(() => "---").join("|")}|`,
   ];
   for (const block of groupMetrics(visibleMetrics(sorted))) {
-    lines.push(`| **${block.title}** |${sorted.map(() => " ").join("|")}|`);
+    lines.push(`| **${t(block.title)}** |${sorted.map(() => " ").join("|")}|`);
     for (const metric of block.metrics) {
-      lines.push(`| ${metric.label} | ${sorted.map((r) => cell(metric.text(r, ctx))).join(" | ")} |`);
+      lines.push(`| ${t(metric.label)} | ${sorted.map((r) => cell(t(metric.text(r, ctx)))).join(" | ")} |`);
     }
   }
   return lines.join("\n");

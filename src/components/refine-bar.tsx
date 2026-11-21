@@ -1,5 +1,6 @@
 "use client";
 
+import { usePreferences } from "@/components/preferences-provider";
 import { useMemo } from "react";
 import { Sym } from "@/components/sym";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import { useRepoProbes } from "@/lib/tokenizers/use-repo-probes";
  * how big the download is, and only shows up when there is something to gain.
  */
 export function RefineBar({ rows, refine }: { rows: Row[]; refine: RefineApi }) {
+  const { t, tError } = usePreferences();
   const targets = useMemo(() => refineTargets(rows, refine.refined), [rows, refine.refined]);
   const probes = useRepoProbes(targets.map((t) => t.repo));
 
@@ -39,7 +41,8 @@ export function RefineBar({ rows, refine }: { rows: Row[]; refine: RefineApi }) 
       <Notice>
         <p className="flex items-center gap-2 text-sm" role="status">
           <Sym className="animate-pulse text-blue">●</Sym>
-          Descargando {loading.length} {loading.length === 1 ? "tokenizador" : "tokenizadores"} ·{" "}
+          {t("Descargando ")}
+          {loading.length} {loading.length === 1 ? t("tokenizador") : t("tokenizadores")} ·{" "}
           <span className="num">{Math.round(progress * 100)}%</span>
         </p>
       </Notice>
@@ -47,18 +50,20 @@ export function RefineBar({ rows, refine }: { rows: Row[]; refine: RefineApi }) 
   }
 
   if (failed.length > 0) {
-    const message = refine.status(failed[0]).error ?? "error de red";
+    const message = refine.status(failed[0]).error ?? t("error de red");
     return (
       <Notice>
         <p className="flex items-start gap-2 text-sm" role="alert">
           <Sym className="mt-0.5 text-destructive">⚠</Sym>
           <span>
-            {failed.length === 1 ? "No se pudo cargar un tokenizador" : `No se pudieron cargar ${failed.length} tokenizadores`}
-            : {message}
+            {failed.length === 1
+              ? t("No se pudo cargar un tokenizador")
+              : t("No se pudieron cargar {0} tokenizadores", [failed.length])}
+            : {tError(message)}
           </span>
         </p>
         <Button variant="secondary" size="sm" onClick={() => refine.refine(failed)}>
-          <Sym>↻</Sym> Reintentar
+          <Sym>↻</Sym> {t(" Reintentar")}
         </Button>
       </Notice>
     );
@@ -71,23 +76,30 @@ export function RefineBar({ rows, refine }: { rows: Row[]; refine: RefineApi }) 
       <Notice>
         <p className="text-sm leading-snug">
           <span className="font-semibold">
-            {modelCount} {modelCount === 1 ? "modelo" : "modelos"}
+            {modelCount} {modelCount === 1 ? t("modelo") : t("modelos")}
           </span>{" "}
-          de esta vista {modelCount === 1 ? "usa" : "usan"} un conteo estimado, pero publican su tokenizador
+          {t(
+            modelCount === 1
+              ? "de esta vista usa un conteo estimado, pero publica su tokenizador"
+              : "de esta vista usan un conteo estimado, pero publican su tokenizador",
+          )}
           {size && (
             <>
               {" "}
               (<span className="num">{size}</span>)
             </>
           )}
-          .{capped && <span className="text-muted-foreground"> Caben {refine.room} a la vez.</span>}
+          .
+          {capped && (
+            <span className="text-muted-foreground">
+              {" "}
+              {t(" Caben ")}
+              {refine.room} {t(" a la vez.")}
+            </span>
+          )}
         </p>
-        <Button
-          size="sm"
-          disabled={accepted.length === 0}
-          onClick={() => refine.refine(accepted.map((t) => t.repo))}
-        >
-          <Sym>↓</Sym> Contar con el suyo
+        <Button size="sm" disabled={accepted.length === 0} onClick={() => refine.refine(accepted.map((t) => t.repo))}>
+          <Sym>↓</Sym> {t(" Contar con el suyo")}
         </Button>
       </Notice>
     );
@@ -97,8 +109,11 @@ export function RefineBar({ rows, refine }: { rows: Row[]; refine: RefineApi }) 
     return (
       <Notice>
         <p className="text-sm text-muted-foreground" role="status">
-          Revisando si {checking.length === 1 ? "un modelo estimado publica" : `${checking.length} modelos estimados publican`} su
-          tokenizador…
+          {t("Revisando si ")}
+          {checking.length === 1
+            ? t("un modelo estimado publica")
+            : t("{0} modelos estimados publican", [checking.length])}{" "}
+          {t(" su tokenizador…")}
         </p>
       </Notice>
     );

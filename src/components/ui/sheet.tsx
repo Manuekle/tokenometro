@@ -1,5 +1,6 @@
 "use client"
 
+import { usePreferences } from "@/components/preferences-provider";
 import * as React from "react"
 import { cn } from "cn"
 import { Dialog as SheetPrimitive } from "radix-ui"
@@ -54,6 +55,7 @@ function SheetContent({
   side?: "top" | "right" | "bottom" | "left"
   showCloseButton?: boolean
 }) {
+  const { t } = usePreferences();
   return (
     <SheetPortal>
       <SheetOverlay />
@@ -61,7 +63,7 @@ function SheetContent({
         data-slot="sheet-content"
         data-side={side}
         className={cn(
-          "fixed z-50 flex flex-col bg-background text-foreground shadow-pop outline-none data-open:animate-in data-open:duration-300 data-closed:animate-out data-closed:duration-200 data-[side=bottom]:inset-x-3 data-[side=bottom]:bottom-3 data-[side=bottom]:max-h-[85vh] data-[side=bottom]:rounded-[32px] data-[side=bottom]:data-open:slide-in-from-bottom-10 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=left]:inset-y-3 data-[side=left]:left-3 data-[side=left]:w-[calc(100%-1.5rem)] data-[side=left]:rounded-[32px] data-[side=left]:data-open:slide-in-from-left-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=right]:inset-y-3 data-[side=right]:right-3 data-[side=right]:w-[calc(100%-1.5rem)] data-[side=right]:rounded-[32px] data-[side=right]:data-open:slide-in-from-right-10 data-[side=right]:data-closed:slide-out-to-right-10 data-[side=top]:inset-x-3 data-[side=top]:top-3 data-[side=top]:max-h-[85vh] data-[side=top]:rounded-[32px] data-[side=top]:data-open:slide-in-from-top-10 data-[side=top]:data-closed:slide-out-to-top-10 data-open:fade-in-0 data-closed:fade-out-0 sm:data-[side=left]:max-w-md sm:data-[side=right]:max-w-md",
+          "fixed z-50 flex flex-col overflow-hidden bg-background text-foreground shadow-pop outline-none data-open:animate-in data-open:duration-300 data-closed:animate-out data-closed:duration-200 data-[side=bottom]:inset-x-3 data-[side=bottom]:bottom-3 data-[side=bottom]:max-h-[85vh] data-[side=bottom]:rounded-[32px] data-[side=bottom]:data-open:slide-in-from-bottom-10 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=left]:inset-y-3 data-[side=left]:left-3 data-[side=left]:w-[calc(100%-1.5rem)] data-[side=left]:rounded-[32px] data-[side=left]:data-open:slide-in-from-left-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=right]:inset-y-3 data-[side=right]:right-3 data-[side=right]:w-[calc(100%-1.5rem)] data-[side=right]:rounded-[32px] data-[side=right]:data-open:slide-in-from-right-10 data-[side=right]:data-closed:slide-out-to-right-10 data-[side=top]:inset-x-3 data-[side=top]:top-3 data-[side=top]:max-h-[85vh] data-[side=top]:rounded-[32px] data-[side=top]:data-open:slide-in-from-top-10 data-[side=top]:data-closed:slide-out-to-top-10 data-open:fade-in-0 data-closed:fade-out-0 sm:data-[side=left]:max-w-md sm:data-[side=right]:max-w-md",
           className
         )}
         {...props}
@@ -70,10 +72,10 @@ function SheetContent({
         {showCloseButton && (
           <SheetPrimitive.Close
             data-slot="sheet-close"
-            className="absolute top-4 right-4 grid size-9 place-items-center rounded-full bg-secondary text-foreground transition-colors outline-none hover:bg-secondary/70 focus-visible:ring-[3px] focus-visible:ring-ring/45"
+            className="absolute top-4 right-4 z-10 grid size-9 place-items-center rounded-full bg-secondary text-foreground transition-colors outline-none hover:bg-secondary/70 focus-visible:ring-[3px] focus-visible:ring-ring/45"
           >
             <Sym className="text-[13px]">✕</Sym>
-            <span className="sr-only">Cerrar</span>
+            <span className="sr-only">{t("Cerrar")}</span>
           </SheetPrimitive.Close>
         )}
       </SheetPrimitive.Content>
@@ -85,7 +87,7 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sheet-header"
-      className={cn("flex flex-col gap-1.5 p-6 pr-16", className)}
+      className={cn("flex shrink-0 flex-col gap-1.5 p-6 pr-16", className)}
       {...props}
     />
   )

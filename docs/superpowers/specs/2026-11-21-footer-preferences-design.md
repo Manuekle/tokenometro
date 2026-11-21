@@ -19,4 +19,18 @@ Comprobar persistencia y valores inválidos, cobertura de mensajes y ausencia de
 - [x] Alternativas revisadas: controles visibles frente a menús desplegables.
 - [x] Usuario aprobó controles visibles y cambio inmediato con persistencia.
 - [x] Sin placeholders ni cambios ajenos a tema e idioma.
-- [ ] Usuario revisa esta especificación escrita antes de implementar.
+- [x] Usuario revisó y autorizó implementación y publicación.
+
+## Plan de implementación
+
+1. Proveedor de preferencias, restauración del tema antes del primer pintado y controles accesibles en el footer.
+2. Catálogo inglés, mensajes con parámetros y traducción explícita en componentes, ayudas y comparación exportada.
+3. Pruebas, compilación estática, comprobación en navegador y publicación mediante pull request.
+
+## Ajustes adicionales solicitados
+
+El usuario pidió que el favicon conserve el espacio interior del logo del footer y que SEO/Open Graph estén en inglés. El generador de iconos deja de recortar el master. Los metadatos se entregan en inglés en el HTML estático para buscadores y bots de compartir; el banner y su texto alternativo también están en inglés. El selector sigue controlando el idioma de la interfaz.
+
+## Correcciones visuales solicitadas durante la revisión
+
+Alinear los campos de salida y prefijo, dar ancho suficiente al periodo en ambos idiomas, distribuir la búsqueda y las vistas de forma simétrica y mantener títulos, subtítulos y cierre de los dos diálogos y la ficha de modelo fuera del área que se desplaza. Validar con medidas del DOM al hacer scroll y en móvil.

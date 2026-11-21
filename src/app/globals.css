@@ -2,8 +2,17 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Dark mode follows the OS: no class toggling, no flash. */
-@custom-variant dark (@media (prefers-color-scheme: dark));
+/* Follow the OS until a person chooses a theme in the footer. */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+}
 
 @theme inline {
   /* Allo (allo-font): variable in weight, roundness (ROND) and optical size (opsz). */
@@ -118,8 +127,51 @@
   --s-reason: #cc2fdc;
 }
 
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #111111;
+  --ink: #ffffff;
+  --ink-2: #98989d;
+  --ink-3: #636366;
+  --panel: #1b1b1c;
+  --white: #353537;
+  --hair: rgba(255, 255, 255, 0.08);
+  --drop: rgba(0, 0, 0, 0.3);
+  --drop-strong: rgba(0, 0, 0, 0.7);
+
+  --red: #ff453a;
+  --orange: #ff9f0a;
+  --yellow: #ffd60a;
+  --green: #30d158;
+  --mint: #63e6e2;
+  --cyan: #64d2ff;
+  --blue: #0a84ff;
+  --indigo: #7d7aff;
+  --purple: #da8fff;
+  --pink: #ff375f;
+  --signal: #30d158;
+  --signal-ink: #5de08a;
+  --signal-soft: #12301f;
+
+  --primary-foreground: #111111;
+  --secondary: #262628;
+  --muted: #202022;
+  --accent: #2c2c2e;
+  --destructive: #ff6a5f;
+
+  --grid: rgba(255, 255, 255, 0.07);
+  --dot: #55555a;
+  --s-input: #ffffff;
+  --s-cached: #636366;
+  --s-output: #0a84ff;
+  --s-reason: #da8fff;
+}
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --paper: #111111;
     --ink: #ffffff;
     --ink-2: #98989d;
@@ -173,8 +225,11 @@
   --cut-8: color-mix(in oklab, var(--indigo) var(--tint), var(--card));
   --cut-9: color-mix(in oklab, var(--cyan) calc(var(--tint) + 6%), var(--card));
 }
+:root[data-theme="dark"] {
+  --tint: 40%;
+}
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --tint: 40%;
   }
 }
@@ -239,7 +294,9 @@
   .role-label {
     font-size: 11px;
     font-weight: 650;
-    font-variation-settings: "ROND" 20, "opsz" 9;
+    font-variation-settings:
+      "ROND" 20,
+      "opsz" 9;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
@@ -254,13 +311,17 @@
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum", "ss03";
     font-weight: 700;
-    font-variation-settings: "ROND" 90, "opsz" 32;
+    font-variation-settings:
+      "ROND" 90,
+      "opsz" 32;
     letter-spacing: -0.035em;
   }
   /* User text must stay literal: no "->" arrows, no raised punctuation. */
   .raw {
     font-variant-ligatures: no-contextual;
-    font-feature-settings: "calt" 0, "case" 0;
+    font-feature-settings:
+      "calt" 0,
+      "case" 0;
     letter-spacing: 0;
   }
   /* Allo's interface symbols (⌕ ✕ ✓ ★ ⌄ ↗ …) are real glyphs in the font. */

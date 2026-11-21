@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SITE, basePath, homeUrl, siteUrl, webApplicationLd } from "./site";
+import { SEO, SITE, basePath, homeUrl, siteUrl, webApplicationLd } from "./site";
 
 describe("basePath", () => {
   it("is empty on a domain of its own and the repo path on GitHub Pages", () => {
@@ -54,6 +54,9 @@ describe("site copy", () => {
   it("fits what a search result shows", () => {
     expect(SITE.title.length).toBeLessThanOrEqual(65);
     expect(SITE.description.length).toBeLessThanOrEqual(160);
+    expect(SEO.title.length).toBeLessThanOrEqual(65);
+    expect(SEO.description.length).toBeLessThanOrEqual(160);
+    expect(SEO.locale).toBe("en_US");
   });
 });
 
@@ -65,7 +68,7 @@ describe("webApplicationLd", () => {
     expect(ld.url).toBe("https://tokenometro.example/");
     expect(ld.isAccessibleForFree).toBe(true);
     expect(ld.offers.price).toBe("0");
-    expect(ld.inLanguage).toBe("es");
+    expect(ld.inLanguage).toEqual(["es", "en"]);
   });
 
   it("round-trips through JSON, as it is embedded in the page", () => {

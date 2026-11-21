@@ -1,5 +1,6 @@
 "use client";
 
+import { usePreferences } from "@/components/preferences-provider";
 import { cn } from "cn";
 import { Sym } from "@/components/sym";
 import type { Analysis, Row } from "@/lib/compute-rows";
@@ -16,6 +17,7 @@ interface PickProps {
 }
 
 function Pick({ label, caption, row, empty, multiple, recommended, onOpen }: PickProps) {
+  const { t } = usePreferences();
   const shell = cn(
     "relative flex h-full flex-col rounded-[28px] p-5 text-left transition-[transform,background-color] sm:p-6",
     recommended ? "bg-foreground text-background" : "bg-card",
@@ -27,7 +29,7 @@ function Pick({ label, caption, row, empty, multiple, recommended, onOpen }: Pic
       <p className={cn("role-label", muted)}>{label}</p>
       {recommended && (
         <span className="inline-flex h-5 items-center gap-1 rounded-full bg-green px-2.5 text-[11px] font-bold text-white dark:text-black">
-          <Sym>★</Sym> Recomendado
+          <Sym>★</Sym> {t(" Recomendado")}
         </span>
       )}
     </div>
@@ -42,11 +44,11 @@ function Pick({ label, caption, row, empty, multiple, recommended, onOpen }: Pic
       <div className="mt-5">
         <p className="num-lg text-[34px] leading-none">
           {formatUSD(row.monthly)}
-          <span className={cn("ml-1.5 text-sm font-medium tracking-normal", muted)}>/mes</span>
+          <span className={cn("ml-1.5 text-sm font-medium tracking-normal", muted)}>{t("/mes")}</span>
         </p>
         <p className={cn("num mt-2 text-xs", muted)}>
-          {multiple < 1.05 ? "el más barato" : `${formatMultiple(multiple)} el más barato`}
-          {row.model.intelligence !== null && ` · índice ${formatIndex(row.model.intelligence)}`}
+          {multiple < 1.05 ? t("el más barato") : t("{0} el más barato", [formatMultiple(multiple)])}
+          {row.model.intelligence !== null && t(" · índice {0}", [formatIndex(row.model.intelligence)])}
         </p>
       </div>
     </>
@@ -83,31 +85,32 @@ function Pick({ label, caption, row, empty, multiple, recommended, onOpen }: Pic
 }
 
 export function Picks({ analysis, onOpen }: { analysis: Analysis; onOpen: (row: Row) => void }) {
+  const { t } = usePreferences();
   const { cheapest, balanced, bestQuality, multiple } = analysis;
   return (
     <div className="grid gap-3 sm:grid-cols-3">
       <Pick
-        label="Más barato"
-        caption="Menor costo mensual con tus filtros."
+        label={t("Más barato")}
+        caption={t("Menor costo mensual con tus filtros.")}
         row={cheapest}
-        empty="Ningún modelo cumple tus filtros."
+        empty={t("Ningún modelo cumple tus filtros.")}
         multiple={cheapest ? multiple(cheapest) : 1}
         onOpen={onOpen}
       />
       <Pick
-        label="Equilibrio"
-        caption="Donde pagar más deja de rendir: el codo de la frontera calidad-costo."
+        label={t("Equilibrio")}
+        caption={t("Donde pagar más deja de rendir: el codo de la frontera calidad-costo.")}
         row={balanced}
-        empty="Faltan modelos con índice de calidad para calcularlo."
+        empty={t("Faltan modelos con índice de calidad para calcularlo.")}
         multiple={balanced ? multiple(balanced) : 1}
         recommended={balanced !== null}
         onOpen={onOpen}
       />
       <Pick
-        label="Mejor calidad"
-        caption="Mayor índice de inteligencia entre los que pasan tus filtros."
+        label={t("Mejor calidad")}
+        caption={t("Mayor índice de inteligencia entre los que pasan tus filtros.")}
         row={bestQuality}
-        empty="Ningún modelo con índice de calidad."
+        empty={t("Ningún modelo con índice de calidad.")}
         multiple={bestQuality ? multiple(bestQuality) : 1}
         onOpen={onOpen}
       />

@@ -24,6 +24,22 @@ export const SITE = {
   color: "#111111",
 } as const;
 
+/** Search engines and link previews get English metadata even before client-side preferences load. */
+export const SEO = {
+  title: "Tokenómetro · Token counter and API cost by model",
+  description:
+    "Compare the cost of your text across hundreds of AI models. Count tokens with each model's real tokenizer and estimate your monthly API spend.",
+  locale: "en_US",
+  keywords: [
+    "token counter",
+    "AI cost calculator",
+    "LLM API pricing",
+    "compare AI models",
+    "cost per token",
+    "tokenizer",
+  ],
+} as const;
+
 const FALLBACK_URL = "http://localhost:3000";
 
 /**
@@ -58,17 +74,17 @@ export function webApplicationLd(url: URL) {
     "@type": "WebApplication",
     name: SITE.name,
     url: homeUrl(url),
-    description: SITE.description,
+    description: SEO.description,
     applicationCategory: "BusinessApplication",
     operatingSystem: "Any",
     browserRequirements: "Requires JavaScript",
-    inLanguage: SITE.language,
+    inLanguage: ["es", "en"],
     isAccessibleForFree: true,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     featureList: [
-      "Cuenta tokens con el tokenizador de cada familia de modelos, en el navegador",
-      "Proyecta el costo mensual de la API con tu volumen, caché, Batch y razonamiento",
-      "Compara hasta seis modelos lado a lado",
+      "Count tokens with each model family’s tokenizer, in your browser",
+      "Estimate monthly API costs with your volume, caching, Batch and reasoning",
+      "Compare up to six models side by side",
     ],
   };
 }

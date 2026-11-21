@@ -167,3 +167,22 @@ describe("toMarkdown", () => {
     expect(new Set(table.map(columns)).size).toBe(1);
   });
 });
+
+
+describe("English comparison", () => {
+  it("translates summaries and exported metrics without translating model names or changing costs", () => {
+    const rows = rowsOf([
+      model("a/cheap", { name: "Entrada", price: { input: 1, output: 1 }, intelligence: 30 }),
+      model("a/best", { price: { input: 10, output: 10 }, intelligence: 60 }),
+    ]);
+    expect(summarize(rows, "en")[0]).toMatch(/^Entrada is the cheapest/);
+    expect(summarize(rows, "en")[1]).toBe("best has the highest Intelligence Index (60.0).");
+    const md = toMarkdown(rows, "1,000 requests per month", "en");
+    expect(md).toContain("| | Entrada | best |");
+    expect(md).toContain("| **Cost** |");
+    expect(md).toContain("| Per month | $1.10 | $11.00 |");
+    expect(md).toContain("| Count accuracy | Exact | Exact |");
+    expect(md).toContain("Not offered");
+    expect(md).not.toContain("Calidad y límites");
+  });
+});

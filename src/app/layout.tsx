@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import "allo-font"; // the variable font (wght, ROND, opsz) and its obliques
+import { PreferencesProvider } from "@/components/preferences-provider";
+import { themeBootstrap } from "@/lib/preferences";
 import { SiteFooter } from "@/components/site-footer";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SITE, homeUrl, siteUrl } from "@/lib/site";
+import { SEO, SITE, homeUrl, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const publicUrl = siteUrl();
@@ -13,31 +15,37 @@ const canonical = homeUrl(publicUrl);
 export const metadata: Metadata = {
   // Next.js already adds basePath to file-based metadata such as the social image.
   metadataBase: new URL(publicUrl.origin),
-  title: { default: SITE.title, template: `%s · ${SITE.name}` },
-  description: SITE.description,
+  title: { default: SEO.title, template: `%s · ${SITE.name}` },
+  description: SEO.description,
   applicationName: SITE.name,
   // The label under the icon when someone adds the site to their iPhone's home screen.
   appleWebApp: { title: SITE.name },
-  keywords: [...SITE.keywords],
+  keywords: [...SEO.keywords, ...SITE.keywords],
   category: "technology",
   alternates: { canonical },
   openGraph: {
     type: "website",
     url: canonical,
     siteName: SITE.name,
-    locale: SITE.locale,
-    title: SITE.title,
-    description: SITE.description,
+    locale: SEO.locale,
+    alternateLocale: [SITE.locale],
+    title: SEO.title,
+    description: SEO.description,
   },
   twitter: {
     card: "summary_large_image",
-    title: SITE.title,
-    description: SITE.description,
+    title: SEO.title,
+    description: SEO.description,
   },
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
@@ -51,10 +59,15 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className="h-full">
+    <html lang="es" className="h-full" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+      </head>
       <body className="flex min-h-full flex-col">
-        <TooltipProvider delayDuration={150}>{children}</TooltipProvider>
-        <SiteFooter />
+        <PreferencesProvider>
+          <TooltipProvider delayDuration={150}>{children}</TooltipProvider>
+          <SiteFooter />
+        </PreferencesProvider>
       </body>
     </html>
   );

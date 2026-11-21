@@ -1,5 +1,6 @@
 "use client";
 
+import { usePreferences } from "@/components/preferences-provider";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Analysis, Row } from "@/lib/compute-rows";
 import { formatAxisUSD, formatIndex, formatUSD } from "@/lib/format";
@@ -45,8 +46,7 @@ interface Rect {
   w: number;
   h: number;
 }
-const overlaps = (a: Rect, b: Rect) =>
-  a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+const overlaps = (a: Rect, b: Rect) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 
 interface Placement {
   tx: number;
@@ -74,10 +74,35 @@ function placeLabels(
   for (const p of pts) {
     const w = p.name.length * CHAR_W + 4;
     const candidates: (Placement & { rect: Rect })[] = [
-      { tx: p.px, ty: p.py - p.r - 5, anchor: "middle", rect: { x: p.px - w / 2, y: p.py - p.r - 5 - LABEL_H + 2, w, h: LABEL_H } },
-      { tx: p.px, ty: p.py + p.r + 13, anchor: "middle", rect: { x: p.px - w / 2, y: p.py + p.r + 3, w, h: LABEL_H } },
-      { tx: p.px + p.r + 6, ty: p.py + 4, anchor: "start", rect: { x: p.px + p.r + 5, y: p.py - LABEL_H / 2, w, h: LABEL_H } },
-      { tx: p.px - p.r - 6, ty: p.py + 4, anchor: "end", rect: { x: p.px - p.r - 5 - w, y: p.py - LABEL_H / 2, w, h: LABEL_H } },
+      {
+        tx: p.px,
+        ty: p.py - p.r - 5,
+        anchor: "middle",
+        rect: {
+          x: p.px - w / 2,
+          y: p.py - p.r - 5 - LABEL_H + 2,
+          w,
+          h: LABEL_H,
+        },
+      },
+      {
+        tx: p.px,
+        ty: p.py + p.r + 13,
+        anchor: "middle",
+        rect: { x: p.px - w / 2, y: p.py + p.r + 3, w, h: LABEL_H },
+      },
+      {
+        tx: p.px + p.r + 6,
+        ty: p.py + 4,
+        anchor: "start",
+        rect: { x: p.px + p.r + 5, y: p.py - LABEL_H / 2, w, h: LABEL_H },
+      },
+      {
+        tx: p.px - p.r - 6,
+        ty: p.py + 4,
+        anchor: "end",
+        rect: { x: p.px - p.r - 5 - w, y: p.py - LABEL_H / 2, w, h: LABEL_H },
+      },
     ];
     for (const c of candidates) {
       const inside =
@@ -106,6 +131,7 @@ export function FrontierChart({
   pinned: ReadonlySet<string>;
   onOpen: (row: Row) => void;
 }) {
+  const { t } = usePreferences();
   const wrap = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(760);
   const [hover, setHover] = useState<Point | null>(null);
@@ -159,7 +185,7 @@ export function FrontierChart({
   if (!model) {
     return (
       <div className="rounded-[28px] bg-card p-12 text-center text-sm text-muted-foreground">
-        Ningún modelo con índice de calidad en esta vista. Relaja los filtros.
+        {t("Ningún modelo con índice de calidad en esta vista. Relaja los filtros.")}
       </div>
     );
   }
@@ -171,7 +197,13 @@ export function FrontierChart({
 
   const labelled = points.filter((p) => p.kind !== "other");
   const labels = placeLabels(
-    labelled.map((p) => ({ id: p.id, name: p.name, px: x(p.cost), py: y(p.q), r: radius(p.kind) })),
+    labelled.map((p) => ({
+      id: p.id,
+      name: p.name,
+      px: x(p.cost),
+      py: y(p.q),
+      r: radius(p.kind),
+    })),
     { x: M.left, y: M.top - 6, w: innerW + M.right - 4, h: innerH + 6 },
   );
 
@@ -193,20 +225,25 @@ export function FrontierChart({
     return best;
   }
 
-  const tip = hover ? { left: Math.min(Math.max(x(hover.cost), 110), width - 110), top: y(hover.q) } : null;
+  const tip = hover
+    ? {
+        left: Math.min(Math.max(x(hover.cost), 110), width - 110),
+        top: y(hover.q),
+      }
+    : null;
 
   return (
     <figure className="rounded-[32px] bg-card p-5 sm:p-7">
       <figcaption className="mb-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
         <p className="max-w-xl text-xs leading-snug text-muted-foreground">
-          Cada punto es un modelo: a la derecha cuesta más, arriba rinde más. La línea verde es la{" "}
-          <strong className="font-semibold text-foreground">frontera eficiente</strong>: ningún otro modelo es a la
-          vez más barato y mejor.
+          {t("Cada punto es un modelo: a la derecha cuesta más, arriba rinde más. La línea verde es la")}{" "}
+          <strong className="font-semibold text-foreground">{t("frontera eficiente")}</strong>
+          {t(": ningún otro modelo es a la vez más barato y mejor.")}
         </p>
         <ul className="flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
-          <Legend color="var(--signal)" label="Frontera" />
-          <Legend color="var(--dot)" label="Otros" />
-          {pinned.size > 0 && <Legend color="var(--orange)" label="Fijados" />}
+          <Legend color="var(--signal)" label={t("Frontera")} />
+          <Legend color="var(--dot)" label={t("Otros")} />
+          {pinned.size > 0 && <Legend color="var(--orange)" label={t("Fijados")} />}
         </ul>
       </figcaption>
 
@@ -215,7 +252,11 @@ export function FrontierChart({
           width={width}
           height={height}
           role="img"
-          aria-label={`Calidad frente a costo mensual de ${points.length} modelos. La frontera eficiente tiene ${frontier.length}: ${frontier.map((p) => p.name).join(", ")}.`}
+          aria-label={t("Calidad frente a costo mensual de {0} modelos. La frontera eficiente tiene {1}: {2}.", [
+            points.length,
+            frontier.length,
+            frontier.map((p) => p.name).join(", "),
+          ])}
           className="block touch-manipulation select-none"
           onPointerMove={(e) => setHover(nearest(e.clientX, e.clientY, e.currentTarget))}
           onPointerLeave={() => setHover(null)}
@@ -229,7 +270,14 @@ export function FrontierChart({
           {yTicks.map((t) => (
             <g key={`y${t}`}>
               <line x1={M.left} x2={width - M.right} y1={y(t)} y2={y(t)} stroke="var(--grid)" />
-              <text x={M.left - 8} y={y(t) + 4} textAnchor="end" fontSize={11} fill="var(--muted-foreground)" className="num">
+              <text
+                x={M.left - 8}
+                y={y(t) + 4}
+                textAnchor="end"
+                fontSize={11}
+                fill="var(--muted-foreground)"
+                className="num"
+              >
                 {t}
               </text>
             </g>
@@ -237,13 +285,20 @@ export function FrontierChart({
           {xTicks.map((t) => (
             <g key={`x${t}`}>
               <line x1={x(t)} x2={x(t)} y1={M.top} y2={M.top + innerH} stroke="var(--grid)" />
-              <text x={x(t)} y={M.top + innerH + 18} textAnchor="middle" fontSize={11} fill="var(--muted-foreground)" className="num">
+              <text
+                x={x(t)}
+                y={M.top + innerH + 18}
+                textAnchor="middle"
+                fontSize={11}
+                fill="var(--muted-foreground)"
+                className="num"
+              >
                 {formatAxisUSD(t)}
               </text>
             </g>
           ))}
           <text x={M.left + innerW / 2} y={height - 8} textAnchor="middle" fontSize={11} fill="var(--muted-foreground)">
-            Costo mensual · escala logarítmica
+            {t("Costo mensual · escala logarítmica")}
           </text>
           <text
             transform={`translate(14 ${M.top + innerH / 2}) rotate(-90)`}
@@ -251,7 +306,7 @@ export function FrontierChart({
             fontSize={11}
             fill="var(--muted-foreground)"
           >
-            Índice de inteligencia
+            {t("Índice de inteligencia")}
           </text>
 
           {/* frontier line */}
@@ -266,22 +321,25 @@ export function FrontierChart({
           )}
 
           {/* points: others first so the interesting ones sit on top */}
-          {[...points].sort((a, b) => order(a.kind) - order(b.kind)).map((p) => {
-            const active = hover?.id === p.id;
-            const fill = p.kind === "frontier" ? "var(--signal)" : p.kind === "marked" ? "var(--orange)" : "var(--dot)";
-            return (
-              <circle
-                key={p.id}
-                cx={x(p.cost)}
-                cy={y(p.q)}
-                r={radius(p.kind) + (active ? 2 : 0)}
-                fill={fill}
-                fillOpacity={p.kind === "other" ? 0.8 : 1}
-                stroke="var(--card)"
-                strokeWidth={1.5}
-              />
-            );
-          })}
+          {[...points]
+            .sort((a, b) => order(a.kind) - order(b.kind))
+            .map((p) => {
+              const active = hover?.id === p.id;
+              const fill =
+                p.kind === "frontier" ? "var(--signal)" : p.kind === "marked" ? "var(--orange)" : "var(--dot)";
+              return (
+                <circle
+                  key={p.id}
+                  cx={x(p.cost)}
+                  cy={y(p.q)}
+                  r={radius(p.kind) + (active ? 2 : 0)}
+                  fill={fill}
+                  fillOpacity={p.kind === "other" ? 0.8 : 1}
+                  stroke="var(--card)"
+                  strokeWidth={1.5}
+                />
+              );
+            })}
 
           {/* labels for frontier and pinned models */}
           {labelled.map((p) => {
@@ -317,7 +375,8 @@ export function FrontierChart({
             <p className="text-muted-foreground">{hover.vendor}</p>
             <p className="num mt-1.5">
               {formatUSD(hover.row.monthly)}
-              <span className="text-muted-foreground"> /mes</span> · índice {formatIndex(hover.q)}
+              <span className="text-muted-foreground"> {t(" /mes")}</span> {t(" · índice ")}
+              {formatIndex(hover.q)}
             </p>
           </div>
         )}
@@ -343,8 +402,9 @@ export function FrontierChart({
       )}
 
       <p className="mt-3 text-[11px] text-muted-foreground">
-        Índice de inteligencia: Artificial Analysis (vía OpenRouter). Mide tareas generales; valida con tus propios
-        casos antes de decidir.
+        {t(
+          "Índice de inteligencia: Artificial Analysis (vía OpenRouter). Mide tareas generales; valida con tus propios casos antes de decidir.",
+        )}
       </p>
     </figure>
   );
@@ -357,7 +417,10 @@ function Legend({ color, label, ring }: { color: string; label: string; ring?: b
     <li className="flex items-center gap-1.5">
       <span
         className="inline-block size-2.5 rounded-full"
-        style={{ background: color, outline: ring ? "1.5px solid var(--foreground)" : undefined }}
+        style={{
+          background: color,
+          outline: ring ? "1.5px solid var(--foreground)" : undefined,
+        }}
       />
       {label}
     </li>

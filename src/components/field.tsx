@@ -17,7 +17,7 @@ interface FieldProps {
 
 export function Field({ label, hint, htmlFor, right, className, children }: FieldProps) {
   return (
-    <div className={cn("grid gap-2", className)}>
+    <div className={cn("grid min-w-0 content-start gap-2", className)}>
       <div className="flex items-baseline justify-between gap-2">
         <Label htmlFor={htmlFor}>{label}</Label>
         {right}

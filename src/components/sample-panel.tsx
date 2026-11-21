@@ -1,5 +1,6 @@
 "use client";
 
+import { usePreferences } from "@/components/preferences-provider";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "cn";
 import { Sym } from "@/components/sym";
@@ -35,49 +36,51 @@ interface Props {
 const looksBinary = (text: string) => text.slice(0, 8192).includes("\u0000");
 
 export function SamplePanel({ samples, counts, onAdd, onEdit, onRemove, onPreset }: Props) {
+  const { t } = usePreferences();
   const [kind, setKind] = useState<SampleKind>("input");
   const [dragging, setDragging] = useState(false);
-  const [problem, setProblem] = useState<string | null>(null);
+  const [problem, setProblem] = useState<{ source: string; name: string }[] | null>(null);
   const [presetsOpen, setPresetsOpen] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
-  const visible = samples
-    .map((sample, index) => ({ sample, index }))
-    .filter(({ sample }) => sample.kind === kind);
+  const visible = samples.map((sample, index) => ({ sample, index })).filter(({ sample }) => sample.kind === kind);
   const countOf = (k: SampleKind) => samples.filter((s) => s.kind === k).length;
 
   async function readFiles(files: FileList | File[]) {
     setProblem(null);
-    const rejected: string[] = [];
+    const rejected: { source: string; name: string }[] = [];
     for (const file of Array.from(files)) {
       if (file.size > MAX_FILE_BYTES) {
-        rejected.push(`${file.name}: pesa más de 20 MB`);
+        rejected.push({ source: "{0}: pesa más de 20 MB", name: file.name });
         continue;
       }
       const text = await file.text();
       if (looksBinary(text)) {
-        rejected.push(`${file.name}: no es texto (PDF, Word o imagen). Copia su texto y pégalo.`);
+        rejected.push({
+          source: "{0}: no es texto (PDF, Word o imagen). Copia su texto y pégalo.",
+          name: file.name,
+        });
         continue;
       }
       onAdd(kind, file.name, text, true);
     }
-    if (rejected.length > 0) setProblem(rejected.join(" · "));
+    if (rejected.length > 0) setProblem(rejected);
   }
 
   return (
     <Step
       n={1}
-      title="Tu texto"
+      title={t("Tu texto")}
       action={
         <Popover open={presetsOpen} onOpenChange={setPresetsOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm">
-              <Sym>★</Sym> Ejemplos
+              <Sym>★</Sym> {t(" Ejemplos")}
             </Button>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-80 p-2">
             <p className="px-3 pt-2 pb-2 text-xs leading-snug text-muted-foreground">
-              Cargan un texto y una carga de trabajo típica. Reemplazan lo que tengas.
+              {t("Cargan un texto y una carga de trabajo típica. Reemplazan lo que tengas.")}
             </p>
             {PRESETS.map((p) => (
               <button
@@ -90,8 +93,8 @@ export function SamplePanel({ samples, counts, onAdd, onEdit, onRemove, onPreset
                 }}
                 className="flex w-full flex-col items-start gap-0.5 rounded-2xl px-3 py-2.5 text-left outline-none hover:bg-secondary focus-visible:bg-secondary"
               >
-                <span className="text-sm font-semibold">{p.label}</span>
-                <span className="text-xs text-muted-foreground">{p.blurb}</span>
+                <span className="text-sm font-semibold">{t(p.label)}</span>
+                <span className="text-xs text-muted-foreground">{t(p.blurb)}</span>
               </button>
             ))}
           </PopoverContent>
@@ -102,17 +105,23 @@ export function SamplePanel({ samples, counts, onAdd, onEdit, onRemove, onPreset
         <Tabs value={kind} onValueChange={(v) => setKind(v as SampleKind)}>
           <TabsList className="w-full">
             <TabsTrigger value="input">
-              Entrada <span className="num text-muted-foreground">{countOf("input")}</span>
+              {t("Entrada ")}
+              <span className="num text-muted-foreground">{countOf("input")}</span>
             </TabsTrigger>
             <TabsTrigger value="output">
-              Respuesta típica <span className="num text-muted-foreground">{countOf("output")}</span>
+              {t("Respuesta típica ")}
+              <span className="num text-muted-foreground">{countOf("output")}</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>
         <p className="text-xs leading-relaxed text-muted-foreground">
           {kind === "input"
-            ? "Lo que enviarías al modelo en una solicitud típica: un documento, un correo, un fragmento de código. Con varias muestras se promedia."
-            : "Opcional. Pega una respuesta típica para contar la salida con cada tokenizador. Sin ella se usan los tokens de salida de abajo."}
+            ? t(
+                "Lo que enviarías al modelo en una solicitud típica: un documento, un correo, un fragmento de código. Con varias muestras se promedia.",
+              )
+            : t(
+                "Opcional. Pega una respuesta típica para contar la salida con cada tokenizador. Sin ella se usan los tokens de salida de abajo.",
+              )}
         </p>
       </div>
 
@@ -136,10 +145,10 @@ export function SamplePanel({ samples, counts, onAdd, onEdit, onRemove, onPreset
           <div className="grid place-items-center gap-1.5 rounded-3xl bg-raise px-5 py-8 text-center shadow-raise">
             <Sym className="text-2xl text-faint">↑</Sym>
             <p className="text-sm font-semibold">
-              {kind === "input" ? "Aún no hay texto" : "Sin respuesta de ejemplo"}
+              {kind === "input" ? t("Aún no hay texto") : t("Sin respuesta de ejemplo")}
             </p>
             <p className="text-xs leading-snug text-muted-foreground">
-              Pega un texto, suelta archivos aquí o carga un ejemplo.
+              {t("Pega un texto, suelta archivos aquí o carga un ejemplo.")}
             </p>
           </div>
         )}
@@ -159,12 +168,12 @@ export function SamplePanel({ samples, counts, onAdd, onEdit, onRemove, onPreset
         <Button
           variant="outline"
           size="sm"
-          onClick={() => onAdd(kind, kind === "input" ? "Texto pegado" : "Respuesta pegada", "", false)}
+          onClick={() => onAdd(kind, kind === "input" ? t("Texto pegado") : t("Respuesta pegada"), "", false)}
         >
-          <Sym>+</Sym> Pegar texto
+          <Sym>+</Sym> {t(" Pegar texto")}
         </Button>
         <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()}>
-          <Sym>↑</Sym> Subir archivos
+          <Sym>↑</Sym> {t(" Subir archivos")}
         </Button>
         <input
           ref={fileInput}
@@ -181,13 +190,13 @@ export function SamplePanel({ samples, counts, onAdd, onEdit, onRemove, onPreset
 
       {problem && (
         <p role="alert" className="text-xs leading-snug text-destructive">
-          <Sym>⚠</Sym> {problem}
+          <Sym>⚠</Sym> {problem.map((issue) => t(issue.source, [issue.name])).join(" · ")}
         </p>
       )}
 
       <p className="flex items-start gap-2 text-xs leading-snug text-muted-foreground">
         <Sym className="mt-px text-signal-ink">✓</Sym>
-        Tu texto se cuenta en este navegador. No se envía a ningún servidor.
+        {t("Tu texto se cuenta en este navegador. No se envía a ningún servidor.")}
       </p>
     </Step>
   );
@@ -204,6 +213,7 @@ function SampleCard({
   onEdit: (text: string) => void;
   onRemove: () => void;
 }) {
+  const { t } = usePreferences();
   // Edit locally and commit when typing pauses: a 1 MB paste must not re-count per keystroke.
   const [draft, setDraft] = useState(sample.text);
   const lastCommitted = useRef(sample.text);
@@ -222,7 +232,7 @@ function SampleCard({
     <div className="grid gap-2">
       <div className="flex items-center justify-between gap-2 pl-1">
         <span className="truncate text-xs font-semibold">{sample.name}</span>
-        <Button variant="ghost" size="icon-xs" onClick={onRemove} aria-label={`Quitar ${sample.name}`}>
+        <Button variant="ghost" size="icon-xs" onClick={onRemove} aria-label={t("Quitar {0}", [sample.name])}>
           <Sym>⌫</Sym>
         </Button>
       </div>
@@ -234,15 +244,15 @@ function SampleCard({
         <Textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="Pega aquí un texto típico…"
+          placeholder={t("Pega aquí un texto típico…")}
           spellCheck={false}
           className="raw field-sizing-fixed h-32 max-h-80 min-h-20 resize-y text-[13px] leading-relaxed"
-          aria-label={`Texto de ${sample.name}`}
+          aria-label={t("Texto de {0}", [sample.name])}
         />
       )}
       <p className="num pl-1 text-xs text-muted-foreground">
-        {formatInt(chars)} caracteres ·{" "}
-        {tokens === undefined ? "contando…" : `${formatInt(tokens)} tokens (o200k)`}
+        {formatInt(chars)} {t(" caracteres ·")}{" "}
+        {tokens === undefined ? t("contando…") : t("{0} tokens (o200k)", [formatInt(tokens)])}
       </p>
     </div>
   );
